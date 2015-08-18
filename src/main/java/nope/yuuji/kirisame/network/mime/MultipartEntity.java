@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by Tkpd_Eka on 8/7/2015.
  */
-public class MultipartEntity {
+public final class MultipartEntity {
 
     private class Model {
         List<String> params = new ArrayList<>();
@@ -29,18 +29,18 @@ public class MultipartEntity {
     private OutputStream outputStream;
     private PrintWriter printWriter;
 
-    public final void setOutputStream(OutputStream outputStream) throws IOException{
+    public void setOutputStream(OutputStream outputStream) throws IOException{
         this.outputStream = outputStream;
         printWriter = new PrintWriter(new OutputStreamWriter(outputStream, UTF8), true);
         setParameters();
     }
 
-    public final void addPart(String param, String value){
+    public void addPart(String param, String value){
         model.params.add(param);
         model.values.add(value);
     }
 
-    public final void addFile(String param,String fileName, byte[] file){
+    public void addFile(String param,String fileName, byte[] file){
         model.filesParams.add(param);
         model.filesName.add(fileName);
         model.filesData.add(file);

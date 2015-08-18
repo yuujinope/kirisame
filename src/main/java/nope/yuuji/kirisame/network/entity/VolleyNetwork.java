@@ -16,6 +16,7 @@ import com.android.volley.toolbox.StringRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+import nope.yuuji.kirisame.Kirisame;
 import nope.yuuji.kirisame.network.util.VolleyNetworkRequestQueue;
 
 /**
@@ -83,6 +84,7 @@ public abstract class VolleyNetwork {
     /**
      * Override this class to add event on network retry
      */
+    @SuppressWarnings("unused")
     protected void onNetworkRetrying(VolleyError volleyError) throws VolleyError {
     }
 
@@ -90,6 +92,7 @@ public abstract class VolleyNetwork {
      * Override this class to add event on network stop retrying
      */
 
+    @SuppressWarnings("unused")
     protected void onNetworkRetryingStop(VolleyError volleyNetwork) throws VolleyError {
     }
 
@@ -98,11 +101,6 @@ public abstract class VolleyNetwork {
      */
     protected OnRequestErrorListener getDefaultOnRequestErrorListener() {
         return null;
-    }
-
-    public final void printRequest() {
-        System.out.println("Start request : " + url);
-        System.out.println("Request Params : " + param.toString());
     }
 
     public void commit() {
@@ -141,7 +139,7 @@ public abstract class VolleyNetwork {
     protected RetryPolicy getRetryPolicy() {
         return new RetryPolicy() {
 
-            int retry = 0;
+            int retry;
 
             @Override
             public int getCurrentTimeout() {

@@ -60,8 +60,10 @@ public class UrlConnectionWraper {
         switch (protocol) {
             case HTTP:
                 http.setDoOutput(value);
+                break;
             case HTTPS:
                 https.setDoOutput(value);
+                break;
             default:
                 protocolFailed();
                 break;
@@ -72,8 +74,10 @@ public class UrlConnectionWraper {
         switch (protocol) {
             case HTTP:
                 http.setDoInput(value);
+                break;
             case HTTPS:
                 https.setDoInput(value);
+                break;
             default:
                 protocolFailed();
                 break;
@@ -84,8 +88,10 @@ public class UrlConnectionWraper {
         switch (protocol) {
             case HTTP:
                 http.setChunkedStreamingMode(size);
+                break;
             case HTTPS:
                 https.setChunkedStreamingMode(size);
+                break;
             default:
                 protocolFailed();
                 break;
@@ -96,8 +102,10 @@ public class UrlConnectionWraper {
         switch (protocol) {
             case HTTP:
                 http.setRequestProperty(field, value);
+                break;
             case HTTPS:
                 https.setRequestProperty(field, value);
+                break;
             default:
                 protocolFailed();
                 break;
@@ -152,13 +160,43 @@ public class UrlConnectionWraper {
         }
     }
 
+    public void setReadTimeOut(int timeoutMillis){
+        switch(protocol){
+            case HTTP:
+                http.setReadTimeout(timeoutMillis);
+                break;
+            case HTTPS:
+                https.setReadTimeout(timeoutMillis);
+                break;
+            default:
+                protocolFailed();
+                break;
+        }
+    }
+
+    public void setConnectTimeOut(int timeoutMillis){
+        switch(protocol){
+            case HTTP:
+                http.setConnectTimeout(timeoutMillis);
+                break;
+            case HTTPS:
+                https.setConnectTimeout(timeoutMillis);
+                break;
+            default:
+                protocolFailed();
+                break;
+        }
+    }
+
     private void initHttp(URL url, Proxy proxy) throws IOException {
         protocol = HTTP;
         if (proxy == null)
             http = (HttpURLConnection) url.openConnection();
         else
             http = (HttpURLConnection) url.openConnection(proxy);
-    }
+
+
+ }
 
     private void initHttps(URL url, Proxy proxy) throws IOException {
         protocol = HTTPS;

@@ -1,0 +1,133 @@
+apply plugin: 'maven'
+
+def repoUrl = project.PUBLISH_REPO_URL
+def repoSnapshotUrl = project.PUBLISH_REPO_SNAPSHOT_URL
+
+def groupId = project.PUBLISH_GROUP_ID
+def artifactId = project.PUBLISH_ARTIFACT_ID
+def version = project.PUBLISH_VERSION
+
+def useSigning = project.PUBLISH_USE_SIGNING
+
+def repoUsername = project.PUBLISH_REPO_USERNAME
+def repoPassword = project.PUBLISH_REPO_PASSWORD
+
+def appName = project.PUBLISH_APP_NAME
+def appDescription = project.PUBLISH_APP_DESCRIPTION
+def appUrl = project.PUBLISH_APP_URL
+
+def scmConnection = project.PUBLISH_SCM_CONNECTION
+def scmDevConnection = project.PUBLISH_SCM_DEVCONNECTION
+def scmUrl = project.PUBLISH_SCM_URL
+
+def licenseName = project.PUBLISH_LICENSE_NAME
+def licenseUrl = project.PUBLISH_LICENSE_URL
+
+def devId = project.PUBLISH_DEV_ID
+def devName = project.PUBLISH_DEV_ID
+def devEmail = project.PUBLISH_DEV_EMAIL
+
+def localReleaseDest = "${buildDir}/release/${version}"
+
+task androidJavadocs(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+if(useSigning == 'yes') {
+    signing {
+        sign configurations.archives
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            if(useSigning == 'yes') {
+                beforeDeployment {
+                    MavenDeployment deployment -> signing.signPom(deployment)
+                }
+            }
+
+            repository(url: repoUrl) {
+                authentication(userName: repoUsername, password: repoPassword)
+            }
+
+            snapshotRepository(url: repoSnapshotUrl) {
+                authentication(userName: repoUsername, password: repoPassword)
+            }
+
+            pom.project {
+                name appName
+                packaging 'aar'
+
+                pom.groupId = groupId
+                pom.artifactId = artifactId
+                pom.version = version
+                description appDescription
+
+                if (appUrl != null) {
+                    url appUrl
+                }
+
+                if (scmConnection != null && scmDevConnection != null && scmUrl != null) {
+                    scm {
+                        connection scmConnection
+                        developerConnection scmDevConnection
+                        url scmUrl
+                    }
+                }
+
+                if (licenseName != null && licenseUrl != null) {
+                    licenses {
+                        license {
+                            name licenseName
+                            url licenseUrl
+                        }
+                    }
+                }
+
+                if (devId != null && devName != null && devEmail != null) {
+                    developers {
+                        developer {
+                            id devId
+                            name devName
+                            email devEmail
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+task zipRelease(type: Zip) {
+    from localReleaseDest
+    destinationDir buildDir
+    archiveName "release-${version}.zip"
+}
+
+task generateRelease << {
+    println "Release ${version} can be found at ${localReleaseDest}/"
+    println "Release ${version} zipped can be found ${buildDir}/release-${version}.zip"
+}
+
+generateRelease.dependsOn(uploadArchives)
+generateRelease.dependsOn(zipRelease)
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}

@@ -40,7 +40,7 @@ public class SimpleCameraHandler {
         return Uri.fromFile(getOutputMediaFile(imageName));
     }
 
-    private File getOutputMediaFile(String imageName) {
+    public File getOutputMediaFile(String imageName) {
         File mediaStorageDir = new File(
                 context.getExternalFilesDir(null) + File.separator
                         + "IMAGES" + File.separator);
