@@ -11,7 +11,7 @@ ext {
 ext {
     PUBLISH_GROUP_ID = 'com.tokopedia.dev'
     PUBLISH_ARTIFACT_ID = 'Kirisame'
-    PUBLISH_VERSION = 'StardustReverie 1.0.0'
+    PUBLISH_VERSION = 'StardustReverie 1.1.1'
 }
 
 ext {

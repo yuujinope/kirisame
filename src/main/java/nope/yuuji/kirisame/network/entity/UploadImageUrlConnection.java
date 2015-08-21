@@ -98,7 +98,7 @@ public abstract class UploadImageUrlConnection {
     }
 
     protected Settings getSetting() {
-        if(setting == null)
+        if (setting == null)
             return new Settings();
         else
             return setting;

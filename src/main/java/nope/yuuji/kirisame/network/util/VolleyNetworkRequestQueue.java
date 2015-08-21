@@ -17,6 +17,8 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 
+import nope.yuuji.kirisame.Kirisame;
+
 /**
  * Created by Tkpd_Eka on 7/24/2015.
  */
@@ -60,9 +62,7 @@ public class VolleyNetworkRequestQueue {
         // getApplicationContext() is key, it keeps you from leaking the
         // Activity or BroadcastReceiver if someone passes one in.
         File cacheDir = new File(context.getApplicationContext().getCacheDir(), "volley");
-
         HurlStack stack = getHurlStack(proxy, port);
-
         Network network = new BasicNetwork(stack);
 
         RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir), network, THREAD_POOL_SIZE);
@@ -73,16 +73,17 @@ public class VolleyNetworkRequestQueue {
 
     private HurlStack getHurlStack(final String proxyAddress, final int port) {
 
-        if (proxyAddress == null)
+        if (proxyAddress == null) {
             return new HurlStack();
-
-        return new HurlStack() {
-            @Override
-            protected HttpURLConnection createConnection(URL url) throws IOException {
-                Proxy proxy = new Proxy(Proxy.Type.HTTP,
-                        InetSocketAddress.createUnresolved(proxyAddress, port));
-                return (HttpURLConnection) url.openConnection(proxy);
-            }
-        };
+        } else {
+            return new HurlStack() {
+                @Override
+                protected HttpURLConnection createConnection(URL url) throws IOException{
+                    Proxy proxy = new Proxy(Proxy.Type.HTTP,
+                            InetSocketAddress.createUnresolved(proxyAddress, port));
+                    return (HttpURLConnection) url.openConnection(proxy);
+                }
+            };
+        }
     }
 }

@@ -16,11 +16,11 @@ import com.android.volley.toolbox.StringRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-import nope.yuuji.kirisame.Kirisame;
 import nope.yuuji.kirisame.network.util.VolleyNetworkRequestQueue;
 
 /**
  * Created by Tkpd_Eka on 7/23/2015.
+ * Ver 1.1.1
  */
 public abstract class VolleyNetwork {
     public interface OnRequestErrorListener {
@@ -40,6 +40,7 @@ public abstract class VolleyNetwork {
     public class PostStringRequest extends StringRequest {
 
         Map<String, String> param = new HashMap<>();
+        Map<String, String> header = new HashMap<>();
 
         public PostStringRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
             super(method, url, listener, errorListener);
@@ -49,9 +50,23 @@ public abstract class VolleyNetwork {
             this.param = param;
         }
 
+        public void setHeader(Map<String, String> header) {
+            this.header = header;
+        }
+
         @Override
         protected Map<String, String> getParams() throws AuthFailureError {
             return param;
+        }
+
+        @Override
+        public Map<String, String> getHeaders() throws AuthFailureError {
+            return header;
+        }
+
+        @Override
+        public String getBodyContentType(){
+            return null;
         }
     }
 
@@ -67,6 +82,7 @@ public abstract class VolleyNetwork {
     protected Context context;
     protected String url;
     protected Map<String, String> param = new HashMap<>();
+    protected Map<String, String> header = new HashMap<>();
     private OnRequestErrorListener onRequestErrorListener;
     private PostStringRequest request;
 
@@ -105,9 +121,14 @@ public abstract class VolleyNetwork {
 
     public void commit() {
         request = new PostStringRequest(Request.Method.POST, url, onRequestListener(), onRequestErrorListener());
+        request.setHeader(header);
         request.setParam(param);
         request.setRetryPolicy(getRetryPolicy());
         VolleyNetworkRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
+
+    public final void killConnection(){
+        request.cancel();
     }
 
     public final void restartRequest() {
@@ -116,6 +137,10 @@ public abstract class VolleyNetwork {
 
     public final void addParam(String key, String value) {
         param.put(key, value);
+    }
+
+    public final void addHeader(String key, String value) {
+        header.put(key, value);
     }
 
     public final void setOnRequestErrorListener(OnRequestErrorListener listener) {
