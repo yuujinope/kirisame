@@ -20,7 +20,7 @@ import nope.yuuji.kirisame.network.util.VolleyNetworkRequestQueue;
 
 /**
  * Created by Tkpd_Eka on 7/23/2015.
- * Ver 1.1.1
+ * Ver 1.1.2
  */
 public abstract class VolleyNetwork {
     public interface OnRequestErrorListener {
@@ -79,6 +79,10 @@ public abstract class VolleyNetwork {
     public static final int DEFAULT_TIMEOUT = 10000;
     public static final int DEFAULT_RETRY_COUNT = 2;
 
+    public static final int METHOD_GET = Request.Method.GET;
+    public static final int METHOD_POST = Request.Method.POST;
+    public static final int METHOD_PUT = Request.Method.PUT;
+
     protected Context context;
     protected String url;
     protected Map<String, String> param = new HashMap<>();
@@ -88,6 +92,7 @@ public abstract class VolleyNetwork {
 
     private int retryTimeout = DEFAULT_TIMEOUT;
     private int retryMaxCount = DEFAULT_RETRY_COUNT;
+    private int method =  METHOD_GET;
 
     public VolleyNetwork(Context context, String url) {
         this.url = url;
@@ -120,7 +125,7 @@ public abstract class VolleyNetwork {
     }
 
     public void commit() {
-        request = new PostStringRequest(Request.Method.POST, url, onRequestListener(), onRequestErrorListener());
+        request = new PostStringRequest(method, url, onRequestListener(), onRequestErrorListener());
         request.setHeader(header);
         request.setParam(param);
         request.setRetryPolicy(getRetryPolicy());
@@ -150,6 +155,10 @@ public abstract class VolleyNetwork {
     public final void setRetryPolicy(int timeout, int maxCount) {
         retryTimeout = timeout;
         retryMaxCount = maxCount;
+    }
+
+    public final void setMethod(int method){
+        this.method = method;
     }
 
     private Response.Listener<String> onRequestListener() {

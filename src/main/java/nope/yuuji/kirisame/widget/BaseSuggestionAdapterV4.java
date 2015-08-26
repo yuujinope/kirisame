@@ -3,15 +3,15 @@ package nope.yuuji.kirisame.widget;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 
 /**
- * Created by Tkpd_Eka on 8/26/2015.
+ * Created by YuujiSakakibara on 2015/08/16.
  */
-public abstract class BaseSuggestionAdapter extends CursorAdapter {
+public abstract class BaseSuggestionAdapterV4 extends CursorAdapter {
 
     public static final String[] PRIMARY_KEY = {"_id", "KEY"};
 
@@ -32,15 +32,15 @@ public abstract class BaseSuggestionAdapter extends CursorAdapter {
 
     protected abstract int getModelSize();
 
-    public BaseSuggestionAdapter(Context context, Cursor c) {
+    public BaseSuggestionAdapterV4(Context context, Cursor c) {
         super(context, c);
     }
 
-    public BaseSuggestionAdapter(Context context, Cursor c, boolean autoRequery) {
+    public BaseSuggestionAdapterV4(Context context, Cursor c, boolean autoRequery) {
         super(context, c, autoRequery);
     }
 
-    public BaseSuggestionAdapter(Context context, Cursor c, int flags) {
+    public BaseSuggestionAdapterV4(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
