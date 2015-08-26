@@ -6,10 +6,14 @@ Next (OnProgress):
 #StardustReverie 1.2.0:
 RecyclerView adapter & Delegates
 
-#StardustReverie 1.1.2:
-UploadImageConnection to kill network on demand.
+#Next:
+UploadImageUrl kill connection and support more methods
 
 Version History:
+
+#StardustReverie 1.1.2:
+VolleyNetwork 1.1.2 kill connection on demands, support more methods
+Add BaseSuggestionAdapter, renamed the old to BaseSuggestionAdapterV4
 
 #StardustReverie 1.1.1:
 VolleyNetwork 1.1.1 Added custom header, kill network on demand
