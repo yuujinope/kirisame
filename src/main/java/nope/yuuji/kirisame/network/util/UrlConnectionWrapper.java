@@ -14,7 +14,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by Tkpd_Eka on 8/10/2015.
- * Ver 1.2.1
+ * Ver 1.2.2
  */
 public class UrlConnectionWrapper {
 
@@ -161,8 +161,8 @@ public class UrlConnectionWrapper {
         }
     }
 
-    public void setReadTimeOut(int timeoutMillis){
-        switch(protocol){
+    public void setReadTimeOut(int timeoutMillis) {
+        switch (protocol) {
             case HTTP:
                 http.setReadTimeout(timeoutMillis);
                 break;
@@ -175,8 +175,8 @@ public class UrlConnectionWrapper {
         }
     }
 
-    public void setConnectTimeOut(int timeoutMillis){
-        switch(protocol){
+    public void setConnectTimeOut(int timeoutMillis) {
+        switch (protocol) {
             case HTTP:
                 http.setConnectTimeout(timeoutMillis);
                 break;
@@ -189,6 +189,17 @@ public class UrlConnectionWrapper {
         }
     }
 
+    public void disconnect() {
+        switch (protocol) {
+            case HTTP:
+                http.disconnect();
+                break;
+            case HTTPS:
+                https.disconnect();
+                break;
+        }
+    }
+
     private void initHttp(URL url, Proxy proxy) throws IOException {
         protocol = HTTP;
         if (proxy == null)
@@ -197,7 +208,7 @@ public class UrlConnectionWrapper {
             http = (HttpURLConnection) url.openConnection(proxy);
 
 
- }
+    }
 
     private void initHttps(URL url, Proxy proxy) throws IOException {
         protocol = HTTPS;

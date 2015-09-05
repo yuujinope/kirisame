@@ -22,7 +22,7 @@ import nope.yuuji.kirisame.network.util.VolleyNetworkRequestQueue;
 
 /**
  * Created by Tkpd_Eka on 7/23/2015.
- * Ver 1.2.0
+ * Ver 1.2.1
  */
 public abstract class VolleyNetwork {
 
@@ -113,6 +113,10 @@ public abstract class VolleyNetwork {
         request.setParam(param);
         request.setRetryPolicy(getRetryPolicy());
         VolleyNetworkRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
+
+    public void setProxy(String address, int port){
+        VolleyNetworkRequestQueue.getInstance(context).setProxy(address, port);
     }
 
     public final void killConnection() {

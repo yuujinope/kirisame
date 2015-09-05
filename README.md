@@ -12,7 +12,11 @@ UploadImageUrl kill connection and support more methods
 
 Version History:
 
-#StardustReverie 1.2.1:
+#StardustReverie 1.2.2:
+UrlConnectionWrapper 1.2.2 add disconnect
+VolleyNetwork 1.2.2 add setProxy for convenience
+
+#StardustReverie 1.2.0:
 VolleyNetwork 1.2.0 fix support url query for GET method, new error handling system
 UploadImageUrlConnection 1.2.1 new error handling system
 UrlConnectionWrapper 1.2.1 fix typo in name
