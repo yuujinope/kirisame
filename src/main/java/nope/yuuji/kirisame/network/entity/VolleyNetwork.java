@@ -13,6 +13,8 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,22 +22,9 @@ import nope.yuuji.kirisame.network.util.VolleyNetworkRequestQueue;
 
 /**
  * Created by Tkpd_Eka on 7/23/2015.
- * Ver 1.1.2
+ * Ver 1.2.0
  */
 public abstract class VolleyNetwork {
-    public interface OnRequestErrorListener {
-        void onErrorTimeout(VolleyError volleyError);
-
-        void onErrorNoConnection(VolleyError volleyError);
-
-        void onErrorParse(VolleyError volleyError);
-
-        void onErrorAuthFailure(VolleyError volleyError);
-
-        void onErrorServerError(VolleyError volleyError);
-
-        void onRequestErrorDefault(VolleyError volleyError);
-    }
 
     public class PostStringRequest extends StringRequest {
 
@@ -65,7 +54,7 @@ public abstract class VolleyNetwork {
         }
 
         @Override
-        public String getBodyContentType(){
+        public String getBodyContentType() {
             return null;
         }
     }
@@ -87,20 +76,21 @@ public abstract class VolleyNetwork {
     protected String url;
     protected Map<String, String> param = new HashMap<>();
     protected Map<String, String> header = new HashMap<>();
-    private OnRequestErrorListener onRequestErrorListener;
+    protected Map<String, String> urlQuery = new HashMap<>();
     private PostStringRequest request;
 
     private int retryTimeout = DEFAULT_TIMEOUT;
     private int retryMaxCount = DEFAULT_RETRY_COUNT;
-    private int method =  METHOD_GET;
+    private int method = METHOD_GET;
 
     public VolleyNetwork(Context context, String url) {
         this.url = url;
         this.context = context;
-        onRequestErrorListener = getDefaultOnRequestErrorListener();
     }
 
     public abstract void onRequestResponse(String response);
+
+    public abstract void onRequestError(NetError e, int responseCode);
 
     /**
      * Override this class to add event on network retry
@@ -117,26 +107,19 @@ public abstract class VolleyNetwork {
     protected void onNetworkRetryingStop(VolleyError volleyNetwork) throws VolleyError {
     }
 
-    /**
-     * @return Override this class to set default RequestError listener on child
-     */
-    protected OnRequestErrorListener getDefaultOnRequestErrorListener() {
-        return null;
-    }
-
     public void commit() {
-        request = new PostStringRequest(method, url, onRequestListener(), onRequestErrorListener());
+        request = new PostStringRequest(method, getUrlWithQuery(), onRequestListener(), onRequestErrorListener());
         request.setHeader(header);
         request.setParam(param);
         request.setRetryPolicy(getRetryPolicy());
         VolleyNetworkRequestQueue.getInstance(context).addToRequestQueue(request);
     }
 
-    public final void killConnection(){
+    public final void killConnection() {
         request.cancel();
     }
 
-    public final void restartRequest() {
+    public final void retryRequest() {
         VolleyNetworkRequestQueue.getInstance(context).addToRequestQueue(request);
     }
 
@@ -148,8 +131,11 @@ public abstract class VolleyNetwork {
         header.put(key, value);
     }
 
-    public final void setOnRequestErrorListener(OnRequestErrorListener listener) {
-        onRequestErrorListener = listener;
+    /**
+     * Used in adding URL Query for GET Methods
+     */
+    public final void addQuery(String key, String name) {
+        urlQuery.put(key, name);
     }
 
     public final void setRetryPolicy(int timeout, int maxCount) {
@@ -157,7 +143,7 @@ public abstract class VolleyNetwork {
         retryMaxCount = maxCount;
     }
 
-    public final void setMethod(int method){
+    public final void setMethod(int method) {
         this.method = method;
     }
 
@@ -201,35 +187,46 @@ public abstract class VolleyNetwork {
         return new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                onRequestError(volleyError);
+                onRequestError(onResponseRequestError(volleyError)
+                        , volleyError.networkResponse.statusCode);
             }
         };
     }
 
-    private void onRequestError(VolleyError volleyError) {
-        if (onRequestErrorListener == null) {
-            return;
-        }
-
+    protected NetError onResponseRequestError(VolleyError volleyError) {
         switch (getErrorInstance(volleyError)) {
             case ERROR_NO_CONNECTION:
-                onRequestErrorListener.onErrorNoConnection(volleyError);
-                break;
+                return NetError.NO_CONNECTION;
             case ERROR_TIMEOUT:
-                onRequestErrorListener.onErrorTimeout(volleyError);
-                break;
+                return NetError.TIMEOUT;
             case ERROR_SERVER_ERROR:
-                onRequestErrorListener.onErrorServerError(volleyError);
-                break;
+                return NetError.SERVER_ERROR;
             case ERROR_AUTH_FAILURE:
-                onRequestErrorListener.onErrorAuthFailure(volleyError);
-                break;
+                return NetError.AUTH_FAILURE;
             case ERROR_PARSE:
-                onRequestErrorListener.onErrorParse(volleyError);
-                break;
+                return NetError.PARSE_ERROR;
             default:
-                onRequestErrorListener.onRequestErrorDefault(volleyError);
-                break;
+                return NetError.UNKNOWN;
+        }
+    }
+
+    protected String getUrlWithQuery() {
+        if (urlQuery.size() == 0)
+            return url;
+
+        StringBuilder queries = new StringBuilder();
+        for (Map.Entry<String, String> entry : urlQuery.entrySet()) {
+            queries.append(String.format("%s=%s&", urlEncoder(entry.getKey()), urlEncoder(entry.getValue())));
+        }
+        return url + queries.substring(0, queries.length() - 1);
+    }
+
+    private String urlEncoder(String string) {
+        try {
+            return URLEncoder.encode(string, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
@@ -245,7 +242,7 @@ public abstract class VolleyNetwork {
         } else if (error instanceof ParseError) {
             return ERROR_PARSE;
         }
-
         return 0;
     }
+
 }

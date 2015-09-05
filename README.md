@@ -3,13 +3,17 @@ Multiple useful simple library for many things
 
 Next (OnProgress):
 
-#StardustReverie 1.2.0:
-RecyclerView adapter & Delegates
+#StardustReverie major:
+1. RecyclerView adapter & Delegates
+2. Connection using RxJava
 
 #Next:
 UploadImageUrl kill connection and support more methods
 
 Version History:
+
+#StardustReverie 1.2.0:
+VolleyNetwork 1.2.0 fix support url query for GET method, new error handling system
 
 #StardustReverie 1.1.2:
 VolleyNetwork 1.1.2 kill connection on demands, support more methods
