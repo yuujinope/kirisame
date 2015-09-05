@@ -17,19 +17,16 @@ import java.net.URL;
 
 import nope.yuuji.kirisame.network.CustomProtocolException;
 import nope.yuuji.kirisame.network.mime.MultipartEntity;
-import nope.yuuji.kirisame.network.util.UrlConnectionWraper;
+import nope.yuuji.kirisame.network.util.UrlConnectionWrapper;
 
 /**
  * Created by Tkpd_Eka on 8/6/2015.
+ * Ver 1.2.1
  */
 public abstract class UploadImageUrlConnection {
 
-    public static final int UNHANDLED_ERROR = -1;
     public static final int CONNECTION_FAILED = 0;
     public static final int CONNECTION_SUCCESS = 1;
-    public static final int ERROR_TIMEOUT = 2;
-    public static final int ERROR_FAILED_TO_GET_INPUTSTREAM = 3;
-    public static final int ERROR_FAILED_TO_ESTABLISH = 4;
     public static final int CONNECTION_OK = 200;
     public static final String POST = "POST";
 
@@ -48,7 +45,7 @@ public abstract class UploadImageUrlConnection {
                     onConnectionSuccess(result);
                     break;
                 default:
-                    onConnectionError(handleConnectionException(exception), exception);
+                    onConnectionError(handleConnectionException(exception), errorCode);
                     break;
             }
         }
@@ -65,6 +62,7 @@ public abstract class UploadImageUrlConnection {
     protected Settings setting = getSetting();
     private String result;
     private IOException exception;
+    private int errorCode;
 
     public static byte[] convertBitmapToByte(Bitmap bitmap, int compressQuality) {
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
@@ -82,7 +80,7 @@ public abstract class UploadImageUrlConnection {
 
     public abstract void onConnectionSuccess(String result);
 
-    public abstract void onConnectionError(int errorCode, IOException e);
+    public abstract void onConnectionError(NetError e, int errorCode);
 
     public final void addPart(String param, String value) {
         requestParameters.addPart(param, value);
@@ -117,14 +115,14 @@ public abstract class UploadImageUrlConnection {
     }
 
     private void handleConnection() throws IOException {
-        UrlConnectionWraper con = createUrlConnection();
+        UrlConnectionWrapper con = createUrlConnection();
         requestParameters.setOutputStream(con.getOutputStream());
         getConnectionResult(con);
     }
 
-    private UrlConnectionWraper createUrlConnection() throws IOException {
+    private UrlConnectionWrapper createUrlConnection() throws IOException {
         URL url = new URL(getUrl());
-        UrlConnectionWraper con = new UrlConnectionWraper();
+        UrlConnectionWrapper con = new UrlConnectionWrapper();
         con.openConnection(url, setting.proxy);
 
         con.setRequestMethod(POST);
@@ -137,20 +135,21 @@ public abstract class UploadImageUrlConnection {
         return con;
     }
 
-    protected void setConnectionRequestProperties(UrlConnectionWraper con) {
+    protected void setConnectionRequestProperties(UrlConnectionWrapper con) {
         con.setRequestProperty("charset", "utf-8");
         con.setRequestProperty("Connection", "Keep-Alive");
         con.setRequestProperty("Cache-Control", "no-cache");
         con.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + MultipartEntity.BOUNDARY);
     }
 
-    private void getConnectionResult(UrlConnectionWraper con) throws IOException {
+    private void getConnectionResult(UrlConnectionWrapper con) throws IOException {
         processResponseCode(con.getResponseCode());
         result = changeInputStreamToString(con.getInputStream());
     }
 
     private void processResponseCode(int responseCode) throws IOException {
         if (responseCode != CONNECTION_OK) {
+            errorCode = responseCode;
             throw new CustomProtocolException(responseCode);
         }
     }
@@ -168,24 +167,26 @@ public abstract class UploadImageUrlConnection {
         return result;
     }
 
-    private int handleConnectionException(IOException e) {
+    private NetError handleConnectionException(IOException e) {
         if (e instanceof SocketTimeoutException) {
             // Failed to establish connection or get response within timeout
-            return ERROR_TIMEOUT;
+            return NetError.TIMEOUT;
         } else if (e instanceof EOFException) {
             // Connection success but failed to get response
-            return ERROR_FAILED_TO_GET_INPUTSTREAM;
+//            return ERROR_FAILED_TO_GET_INPUTSTREAM;
+            return NetError.PARSE_ERROR;
         } else if (e instanceof SocketException) {
             // Failed to establish connection or existing connection distrupted
             // Connection is dropped or blocked
-            return ERROR_FAILED_TO_ESTABLISH;
+//            return ERROR_FAILED_TO_ESTABLISH;
+            return NetError.NO_CONNECTION;
         } else if (e instanceof CustomProtocolException) {
             // Connection returned with recognizeable http code
-            return ((CustomProtocolException) e).getCode();
+            return NetError.SERVER_ERROR;
         } else {
             // Unhandled error instance
             e.printStackTrace();
-            return UNHANDLED_ERROR;
+            return NetError.UNKNOWN;
         }
     }
 

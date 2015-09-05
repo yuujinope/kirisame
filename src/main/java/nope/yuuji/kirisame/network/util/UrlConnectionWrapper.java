@@ -14,8 +14,9 @@ import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by Tkpd_Eka on 8/10/2015.
+ * Ver 1.2.1
  */
-public class UrlConnectionWraper {
+public class UrlConnectionWrapper {
 
     private static final int HTTP = 1;
     private static final int HTTPS = 2;
